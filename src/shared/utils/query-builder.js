@@ -22,10 +22,7 @@ export const queryBuilder = async (Model, queryParams, options = {}) => {
 
     // Áp dụng bộ lọc từ query parameters
     Object.keys(filters).forEach((key) => {
-        if (filters[key]) {
-            applyFilter(key, filters[key], queryConditions);
-            console.log(queryConditions);
-        }
+        applyFilter(key, filters[key], queryConditions);
     });
 
     // Áp dụng tìm kiếm nếu có
@@ -89,7 +86,25 @@ export const queryBuilder = async (Model, queryParams, options = {}) => {
     };
 };
 const applyFilter = (key, value, conditional) => {
-    if (!value) return;
+    if (value === null || value === '') return;
+
+    const matchRange = key.match(/(From|To|Min|Max)$/);
+
+    if (matchRange) {
+        const field = key.replace(/From$|To$|Min$|Max$/, '');
+        const operatorMap = { From: '$gte', To: '$lte', Min: '$gte', Max: '$lte' };
+        const operator = operatorMap[matchRange[1]];
+        conditional[field] = {
+            ...conditional[field],
+            [operator]: matchRange[1] === 'From' || matchRange[1] === 'To' ? new Date(value) : Number(value),
+        };
+        return;
+    }
+
+    if (value === 'true' || value === 'false') {
+        conditional[key] = value === 'true';
+        return;
+    }
 
     if (value === '__nullOrEmpty__') {
         conditional.$or = [

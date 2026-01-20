@@ -4,9 +4,9 @@ import bcrypt from 'bcryptjs';
 import createError from '../../shared/utils/createError.js';
 import createResponse from '../../shared/utils/createResponse.js';
 import handleAsync from '../../shared/utils/handleAsync.js';
-import User from '../user/user.js';
 import { sendMail } from '../mail/sendEmail.js';
 import { getTemplateForgotPassword } from '../mail/template.sendEmail.js';
+import User from '../user/user.model.js';
 
 export const register = handleAsync(async (req, res) => {
     const { email, password, fullName, role } = req.body;
