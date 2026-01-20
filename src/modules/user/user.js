@@ -2,9 +2,8 @@ import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema(
     {
-        fullname: {
+        fullName: {
             type: String,
-            required: true,
         },
         email: {
             type: String,
@@ -16,7 +15,12 @@ const userSchema = new Schema(
         },
         role: {
             type: String,
-            default: 'member',
+        },
+        refreshToken: {
+            type: String,
+        },
+        forgotToken: {
+            type: String,
         },
     },
     { timestamps: true, versionKey: false },
