@@ -62,9 +62,9 @@ export const getInviteInfo = async (req, res) => {
     const { token } = req.query;
 
     const payload = verifyInviteToken(token);
-    console.log(payload)
+    console.log(payload);
     const user = await User.findById(payload.userId);
-    console.log(user)
+    console.log(user);
 
     res.json({
         email: user.email,
@@ -73,7 +73,7 @@ export const getInviteInfo = async (req, res) => {
 };
 
 export const completeRegister = async (req, res) => {
-    const { token, fullName, password } = req.body;
+    const { token, fullName, password, profile } = req.body;
 
     const payload = verifyInviteToken(token);
 
@@ -85,6 +85,17 @@ export const completeRegister = async (req, res) => {
 
     user.fullName = fullName;
     user.password = await bcrypt.hash(password, 10);
+
+    if (user.role === 'teacher') {
+        console.log(user.teacherProfile)
+        user.teacherProfile = {
+            gender: profile?.gender,
+            subject: profile?.subject,
+            classes: profile?.classes,
+            address: profile?.address,
+        };
+    }
+
     user.status = 'active';
     user.inviteToken = null;
 
