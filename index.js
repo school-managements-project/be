@@ -10,7 +10,6 @@ app.use(express.json());
 connectDB();
 
 app.use("/", router);
-
 app.use(notFoundRequest);
 app.listen(PORT, () => {
   console.log(`Example app listening on ${HOST}:${PORT}`);

@@ -1,30 +1,35 @@
-import mongoose, { Schema } from 'mongoose';
+// models/User.js
+import mongoose from 'mongoose';
 
-const userSchema = new Schema(
+const userSchema = new mongoose.Schema(
     {
-        fullName: {
-            type: String,
-        },
+        fullName: String,
+
         email: {
             type: String,
             required: true,
+            unique: true,
         },
+
         password: {
             type: String,
-            required: true,
+            default: null,
         },
+
         role: {
             type: String,
+            enum: ['admin', 'teacher', 'student'],
         },
-        refreshToken: {
+
+        status: {
             type: String,
+            enum: ['pending', 'active'],
+            default: 'pending',
         },
-        forgotToken: {
-            type: String,
-        },
+
+        inviteToken: String,
     },
-    { timestamps: true, versionKey: false },
+    { timestamps: true },
 );
 const User = mongoose.model('User', userSchema);
-
 export default User;

@@ -1,4 +1,3 @@
-
 export const getTemplateWelcome = () => {
     return `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background-color:#0f172a;font-family:Arial,Helvetica,sans-serif;">
   <tr>
@@ -151,4 +150,74 @@ export const getTemplateForgotPassword = (token) => {
 </td>
   </tr>
 </table>`;
+};
+export const invitedTeacher = (link) => {
+    return `
+    <div style="font-family: Arial, sans-serif; background: #f4f6f8; padding: 24px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; padding: 24px;">
+            
+            <h2 style="color: #2c3e50; text-align: center;">
+                📩 Thư mời tạo tài khoản giáo viên
+            </h2>
+
+            <p>Xin chào,</p>
+
+            <p>
+                Bạn đã được <strong>Ban quản trị hệ thống</strong> mời tham gia vào 
+                <strong>Hệ thống Quản lý Học sinh</strong> với vai trò:
+            </p>
+
+            <p style="font-size: 16px;">
+                👉 <strong>Giáo viên</strong>
+            </p>
+
+            <p>
+                Vui lòng nhấn vào nút bên dưới để hoàn tất việc tạo tài khoản.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="${link}"
+                   style="
+                       background: #3498db;
+                       color: #ffffff;
+                       padding: 12px 24px;
+                       text-decoration: none;
+                       border-radius: 6px;
+                       font-weight: bold;
+                       display: inline-block;
+                   ">
+                    Hoàn tất đăng ký
+                </a>
+            </div>
+
+            <p style="color: #555;">
+                Sau khi hoàn tất, bạn sẽ cung cấp các thông tin sau:
+            </p>
+
+            <ul style="color: #555;">
+                <li>ID giáo viên</li>
+                <li>Họ và tên</li>
+                <li>Địa chỉ</li>
+                <li>Email</li>
+                <li>Giới tính</li>
+                <li>Môn giảng dạy</li>
+                <li>Lớp đang phụ trách</li>
+            </ul>
+
+            <p style="color: #e74c3c;">
+                ⏰ Lưu ý: Liên kết này chỉ có hiệu lực trong <strong>24 giờ</strong>.
+            </p>
+
+            <hr style="margin: 24px 0;" />
+
+            <p style="font-size: 12px; color: #888;">
+                Nếu bạn không mong đợi email này, vui lòng bỏ qua.
+            </p>
+
+            <p style="font-size: 12px; color: #888;">
+                © 2026 Hệ thống Quản lý Học sinh
+            </p>
+        </div>
+    </div>
+    `;
 };

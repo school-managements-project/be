@@ -7,6 +7,7 @@ import handleAsync from '../../shared/utils/handleAsync.js';
 import { sendMail } from '../mail/sendEmail.js';
 import { getTemplateForgotPassword } from '../mail/template.sendEmail.js';
 import User from '../user/user.model.js';
+import { verifyInviteToken } from '../../shared/utils/jwt.js';
 
 export const register = handleAsync(async (req, res) => {
     const { email, password, fullName, role } = req.body;
@@ -56,3 +57,38 @@ export const forgotPassword = handleAsync(async (req, res) => {
     await existUser.save();
     return createResponse(res, 200, 'OK', existUser);
 });
+
+export const getInviteInfo = async (req, res) => {
+    const { token } = req.query;
+
+    const payload = verifyInviteToken(token);
+    console.log(payload)
+    const user = await User.findById(payload.userId);
+    console.log(user)
+
+    res.json({
+        email: user.email,
+        role: user.role,
+    });
+};
+
+export const completeRegister = async (req, res) => {
+    const { token, fullName, password } = req.body;
+
+    const payload = verifyInviteToken(token);
+
+    const user = await User.findById(payload.userId);
+
+    if (user.status === 'active') {
+        return res.status(400).json({ message: 'Đã kích hoạt' });
+    }
+
+    user.fullName = fullName;
+    user.password = await bcrypt.hash(password, 10);
+    user.status = 'active';
+    user.inviteToken = null;
+
+    await user.save();
+
+    res.json({ message: 'Tạo tài khoản thành công' });
+};

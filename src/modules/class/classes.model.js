@@ -10,24 +10,24 @@ const classSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
     },
-
     students: [
         {
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
     ],
-
     description: String,
-
     maxStudents: {
         type: Number,
         default: 40,
     },
     subject: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Subject',
     },
-    
+    supervios: {
+        type: Schema.Types.ObjectId,
+        ref: 'Teacher',
+    },
 });
 export const Class = mongoose.model('Class', classSchema);
