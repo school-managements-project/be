@@ -15,7 +15,7 @@ app.use(
 );
 connectDB();
 
-app.use("/", router);
+app.use("/api", router);
 app.use(notFoundRequest);
 app.listen(PORT, () => {
   console.log(`Example app listening on ${HOST}:${PORT}`);

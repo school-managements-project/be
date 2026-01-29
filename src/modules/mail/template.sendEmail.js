@@ -75,7 +75,7 @@ export const getTemplateWelcome = () => {
 </table>`;
 };
 
-export const getTemplateForgotPassword = (token) => {
+export const getTemplateForgotPassword = (link) => {
     return `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background-color:#0f172a;font-family:Arial,Helvetica,sans-serif;">
   <tr>
     <td align="center" style="padding:30px 10px;">
@@ -119,7 +119,7 @@ export const getTemplateForgotPassword = (token) => {
         <table cellpadding="0" cellspacing="0" align="center" style="margin:24px auto;">
           <tr>
             <td align="center" style="background-color:#38bdf8;border-radius:6px;">
-              <a href="${token}" 
+              <a href="${link}" 
                  style="display:inline-block;padding:12px 24px;color:#020617;
                  text-decoration:none;font-weight:bold;font-size:14px;">
                 Khoi phuc mat khau cua ban
