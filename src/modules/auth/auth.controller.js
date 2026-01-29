@@ -1,4 +1,4 @@
-import { JWT_SECRET } from '../../shared/configs/dotenvConfig.js';
+import { CLIENT_URL, JWT_SECRET } from '../../shared/configs/dotenvConfig.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import createError from '../../shared/utils/createError.js';
@@ -29,33 +29,44 @@ export const register = handleAsync(async (req, res) => {
 export const login = handleAsync(async (req, res) => {
     const { email, password } = req.body;
 
-    const userExist = await User.findOne({ email });
+    const user = await User.findOne({ email });
+    if (!user) return createError(res, 400, 'Email hoặc mật khẩu không đúng');
 
-    if (!userExist) return createError(res, 400, 'Email hoặc mật khẩu không đúng');
+    if (user.status !== 'active') return createError(res, 403, 'Tài khoản chưa được kích hoạt');
 
-    const isMatched = bcrypt.compareSync(password, userExist.password);
-
+    const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched) return createError(res, 400, 'Email hoặc mật khẩu không đúng');
 
-    const accessToken = jwt.sign({ _id: userExist._id }, JWT_SECRET);
+    const accessToken = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
 
-    createResponse(res, 200, 'Đăng nhập thành công', {
-        user: userExist,
+    user.password = undefined;
+
+    return createResponse(res, 200, 'Đăng nhập thành công', {
+        user,
         accessToken,
     });
 });
-
+//Gửi mail quên mk
 export const forgotPassword = handleAsync(async (req, res) => {
     const { email } = req.body;
-    const existUser = await User.findOne({ email });
-    if (!existUser) return createError(res, 404, 'Email không tồn tại', err);
-    const forgotToken = jwt.sign({ _id: existUser._id }, 'DOIMATKHAU', {
-        expiresIn: '5m',
-    });
-    await sendMail(existUser.email, 'QUEN MAT KHAU', getTemplateForgotPassword(forgotToken));
-    existUser.forgotToken = forgotToken;
-    await existUser.save();
-    return createResponse(res, 200, 'OK', existUser);
+
+    const user = await User.findOne({ email });
+    if (!user) return createError(res, 404, 'Email không tồn tại');
+
+    if (user.status !== 'active') return createError(res, 400, 'Tài khoản chưa được kích hoạt');
+
+    const forgotToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '5m' });
+
+    user.forgotPasswordToken = forgotToken;
+    user.forgotPasswordExpire = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    const resetLink = `${CLIENT_URL}/auth/reset-password?token=${forgotToken}`;
+    console.log(resetLink);
+
+    await sendMail(user.email, 'QUÊN MẬT KHẨU', getTemplateForgotPassword(resetLink));
+
+    return createResponse(res, 200, 'Đã gửi mail đặt lại mật khẩu');
 });
 
 export const getInviteInfo = async (req, res) => {
@@ -67,8 +78,8 @@ export const getInviteInfo = async (req, res) => {
     console.log(user);
 
     res.json({
-        email: user.email,
-        role: user.role,
+        email: user?.email,
+        role: user?.role,
     });
 };
 
@@ -79,7 +90,7 @@ export const completeRegister = async (req, res) => {
 
     const user = await User.findById(payload.userId);
 
-    if (user.status === 'active') {
+    if (user?.status === 'active') {
         return res.status(400).json({ message: 'Đã kích hoạt' });
     }
 
@@ -87,7 +98,7 @@ export const completeRegister = async (req, res) => {
     user.password = await bcrypt.hash(password, 10);
 
     if (user.role === 'teacher') {
-        console.log(user.teacherProfile)
+        console.log(user.teacherProfile);
         user.teacherProfile = {
             gender: profile?.gender,
             subject: profile?.subject,
@@ -103,3 +114,69 @@ export const completeRegister = async (req, res) => {
 
     res.json({ message: 'Tạo tài khoản thành công' });
 };
+
+//Quên mk
+export const resetPassword = handleAsync(async (req, res) => {
+    const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || !newPassword || !confirmPassword) {
+        return createError(res, 400, 'Thiếu thông tin');
+    }
+
+    if (newPassword !== confirmPassword) {
+        return createError(res, 400, 'Mật khẩu xác nhận không khớp');
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const user = await User.findOne({
+        _id: decoded.userId,
+        forgotPasswordToken: token,
+        forgotPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+        return createError(res, 400, 'Token không hợp lệ hoặc đã hết hạn');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.forgotPasswordToken = null;
+    user.forgotPasswordExpire = null;
+
+    await user.save();
+
+    return createResponse(res, 200, 'Đặt lại mật khẩu thành công');
+});
+
+//Đổi mk
+export const changePassword = handleAsync(async (req, res) => {
+    const userId = req.user._id;
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        return createError(res, 400, 'Vui lòng nhập đầy đủ thông tin');
+    }
+
+    if (newPassword !== confirmPassword) {
+        return createError(res, 400, 'Mật khẩu xác nhận không khớp');
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.password) {
+        return createError(res, 404, 'User không tồn tại');
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+        return createError(res, 400, 'Mật khẩu cũ không đúng');
+    }
+
+    if (oldPassword === newPassword) {
+        return createError(res, 400, 'Mật khẩu mới phải khác mật khẩu cũ');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return createResponse(res, 200, 'Đổi mật khẩu thành công');
+});

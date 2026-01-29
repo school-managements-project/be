@@ -26,14 +26,17 @@ const userSchema = new mongoose.Schema(
             enum: ['pending', 'active'],
             default: 'pending',
         },
-        teacherProfile: {
-            gender: String,
-            subject: String,
-            classes: [String],
-            address: String,
-            gender: String,
-        },
+        // teacherProfile: {
+        //     gender: String,
+        //     subject: String,
+        //     classes: [String],
+        //     address: String,
+        //     gender: String,
+        // },
         inviteToken: String,
+
+        forgotPasswordToken: String,
+        forgotPasswordExpire: Date,
     },
     { timestamps: true },
 );
