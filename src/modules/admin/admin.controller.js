@@ -1,4 +1,5 @@
 // controllers/admin.controller.js
+import { API_FE } from '../../shared/configs/dotenvConfig.js';
 import createError from '../../shared/utils/createError.js';
 import createResponse from '../../shared/utils/createResponse.js';
 import handleAsync from '../../shared/utils/handleAsync.js';
@@ -15,7 +16,6 @@ export const inviteUser = handleAsync(async (req, res) => {
     }
 
     const user = await User.create({ email, role });
-
     const token = createInviteToken({
         userId: user._id,
         type: 'INVITE',
@@ -24,7 +24,7 @@ export const inviteUser = handleAsync(async (req, res) => {
     user.inviteToken = token;
     await user.save();
 
-    const link = `http://localhost:5173/auth/accept-invite?token=${token}`;
+    const link = `${API_FE}/auth/accept-invite?token=${token}`;
 
     await sendInviteMail(email, 'ĐIỀN THÔNG TIN TEACHER', link);
 
