@@ -1,5 +1,6 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
-dotenv.config({});
+dotenv.config({ override: true });
 
-export const { HOST, PORT, DB_URI } = process.env;
+export const { HOST, PORT, DB_URI, JWT_SECRET, JWT_EXPIRES_IN, EMAIL_PASS, EMAIL_USER, INVITE_SECRET, CLIENT_URL } =
+    process.env;
