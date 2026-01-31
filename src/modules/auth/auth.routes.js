@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
     changePassword,
-    completeRegister,
+    completeRegisterController,
     forgotPassword,
     getInviteInfo,
     login,
@@ -19,7 +19,7 @@ authRoutes.post('/login', validBodyRequest(loginSchema), login);
 authRoutes.post('/forgot-password', forgotPassword);
 authRoutes.post('/reset-password', resetPassword);
 authRoutes.get('/invite-info', getInviteInfo);
-authRoutes.patch('/complete-register', completeRegister);
+authRoutes.patch('/complete-register', completeRegisterController);
 
 authRoutes.post('/change-password', checkAuth, changePassword);
 

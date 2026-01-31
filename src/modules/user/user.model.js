@@ -1,5 +1,6 @@
 // models/User.js
 import mongoose from 'mongoose';
+import { RoleEnum } from '../../shared/constants/enum.js    ';
 
 const userSchema = new mongoose.Schema(
     {
@@ -18,9 +19,14 @@ const userSchema = new mongoose.Schema(
 
         role: {
             type: String,
-            enum: ['admin', 'teacher', 'student'],
+            enum: Object.values(RoleEnum),
         },
-
+        userName: {
+            type: String,
+        },
+        userId: {
+            type: String,
+        },
         status: {
             type: String,
             enum: ['pending', 'active'],
@@ -34,7 +40,6 @@ const userSchema = new mongoose.Schema(
         //     gender: String,
         // },
         inviteToken: String,
-
         forgotPasswordToken: String,
         forgotPasswordExpire: Date,
     },

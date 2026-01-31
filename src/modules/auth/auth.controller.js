@@ -1,6 +1,5 @@
 import { CLIENT_URL, JWT_SECRET } from '../../shared/configs/dotenvConfig.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+
 import createError from '../../shared/utils/createError.js';
 import createResponse from '../../shared/utils/createResponse.js';
 import handleAsync from '../../shared/utils/handleAsync.js';
@@ -8,6 +7,9 @@ import { sendMail } from '../mail/sendEmail.js';
 import { getTemplateForgotPassword } from '../mail/template.sendEmail.js';
 import User from '../user/user.model.js';
 import { verifyInviteToken } from '../../shared/utils/jwt.js';
+import * as authServices from './auth.services.js';
+import bcrypt from 'bcryptjs';
+import jwt from "jsonwebtoken"
 
 export const register = handleAsync(async (req, res) => {
     const { email, password, fullName, role } = req.body;
@@ -83,37 +85,10 @@ export const getInviteInfo = async (req, res) => {
     });
 };
 
-export const completeRegister = async (req, res) => {
-    const { token, fullName, password, profile } = req.body;
-
-    const payload = verifyInviteToken(token);
-
-    const user = await User.findById(payload.userId);
-
-    if (user?.status === 'active') {
-        return res.status(400).json({ message: 'Đã kích hoạt' });
-    }
-
-    user.fullName = fullName;
-    user.password = await bcrypt.hash(password, 10);
-
-    if (user.role === 'teacher') {
-        console.log(user.teacherProfile);
-        user.teacherProfile = {
-            gender: profile?.gender,
-            subject: profile?.subject,
-            classes: profile?.classes,
-            address: profile?.address,
-        };
-    }
-
-    user.status = 'active';
-    user.inviteToken = null;
-
-    await user.save();
-
-    res.json({ message: 'Tạo tài khoản thành công' });
-};
+export const completeRegisterController = handleAsync(async (req, res) => {
+    const data = await authServices.completeRegisterService(req.body);
+    return createResponse(res, 201, 'Tạo tài khoản thành công', data);
+});
 
 //Quên mk
 export const resetPassword = handleAsync(async (req, res) => {

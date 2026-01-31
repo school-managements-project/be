@@ -124,11 +124,12 @@ const applyFilter = (key, value, conditional) => {
         return;
     }
 
-    const matchAt = key.macth(/(At)/);
-    if (!matchAt) {
+    // chỉ convert Date khi field kết thúc bằng At
+    if (key.match(/At$/)) {
         conditional[key] = new Date(value);
         return;
     }
 
+    // default: string / enum (role, status, name...)
     conditional[key] = value;
 };
